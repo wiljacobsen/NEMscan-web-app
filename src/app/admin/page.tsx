@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { formatDate, formatDateRange } from "@/lib/utils";
 import { FileText, AlertCircle, Database, Radio } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPage() {
   const { totalItems, unreviewedCount, periods, sources } = await getAdminStats();
 
