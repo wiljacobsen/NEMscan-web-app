@@ -1,0 +1,203 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ImpactLevel {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum ScanPeriodStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum UserRole {
+  ADMIN
+  ANALYST
+  VIEWER
+}
+
+enum AlertChannel {
+  EMAIL
+  IN_APP
+  BOTH
+}
+
+enum AlertFrequency {
+  IMMEDIATE
+  DAILY
+  WEEKLY
+}
+
+enum ScrapingStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model Organisation {
+  id           String           @id @default(cuid())
+  name         String
+  abbreviation String           @unique
+  websiteUrl   String?          @map("website_url")
+  type         String
+  items        RegulatoryItem[]
+  sources      ScrapingSource[]
+  createdAt    DateTime         @default(now()) @map("created_at")
+
+  @@map("organisations")
+}
+
+model Category {
+  id               String           @id @default(cuid())
+  name             String
+  slug             String           @unique
+  parentCategoryId String?          @map("parent_category_id")
+  parent           Category?        @relation("CategoryHierarchy", fields: [parentCategoryId], references: [id])
+  children         Category[]       @relation("CategoryHierarchy")
+  sortOrder        Int              @default(0) @map("sort_order")
+  items            RegulatoryItem[]
+
+  @@map("categories")
+}
+
+model ScanPeriod {
+  id          String           @id @default(cuid())
+  startDate   DateTime         @map("start_date")
+  endDate     DateTime         @map("end_date")
+  status      ScanPeriodStatus @default(DRAFT)
+  publishedAt DateTime?        @map("published_at")
+  createdBy   String?          @map("created_by")
+  creator     User?            @relation(fields: [createdBy], references: [id])
+  items       RegulatoryItem[]
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  @@map("scan_periods")
+}
+
+model RegulatoryItem {
+  id                 String                @id @default(cuid())
+  scanPeriodId       String                @map("scan_period_id")
+  scanPeriod         ScanPeriod            @relation(fields: [scanPeriodId], references: [id], onDelete: Cascade)
+  categoryId         String                @map("category_id")
+  category           Category              @relation(fields: [categoryId], references: [id])
+  organisationId     String                @map("organisation_id")
+  organisation       Organisation          @relation(fields: [organisationId], references: [id])
+  title              String
+  slug               String                @unique
+  sourceUrl          String?               @map("source_url")
+  description        String                @db.Text
+  detailHtml         String?               @map("detail_html") @db.Text
+  impactLevel        ImpactLevel           @map("impact_level")
+  recommendedActions String?               @map("recommended_actions") @db.Text
+  aiGenerated        Boolean               @default(false) @map("ai_generated")
+  aiConfidenceScore  Float?                @map("ai_confidence_score")
+  analystReviewed    Boolean               @default(false) @map("analyst_reviewed")
+  analystNotes       String?               @map("analyst_notes") @db.Text
+  status             String                @default("published")
+  tags               RegulatoryItemTag[]
+  timeline           ConsultationTimeline[]
+  createdAt          DateTime              @default(now()) @map("created_at")
+  updatedAt          DateTime              @updatedAt @map("updated_at")
+
+  @@map("regulatory_items")
+}
+
+model ConsultationTimeline {
+  id               String         @id @default(cuid())
+  regulatoryItemId String         @map("regulatory_item_id")
+  regulatoryItem   RegulatoryItem @relation(fields: [regulatoryItemId], references: [id], onDelete: Cascade)
+  milestoneName    String         @map("milestone_name")
+  milestoneDate    DateTime       @map("milestone_date")
+  isDeadline       Boolean        @default(false) @map("is_deadline")
+
+  @@index([regulatoryItemId, milestoneDate])
+  @@map("consultation_timelines")
+}
+
+model Tag {
+  id    String              @id @default(cuid())
+  name  String
+  slug  String              @unique
+  items RegulatoryItemTag[]
+
+  @@map("tags")
+}
+
+model RegulatoryItemTag {
+  regulatoryItemId String         @map("regulatory_item_id")
+  tagId            String         @map("tag_id")
+  regulatoryItem   RegulatoryItem @relation(fields: [regulatoryItemId], references: [id], onDelete: Cascade)
+  tag              Tag            @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([regulatoryItemId, tagId])
+  @@map("regulatory_item_tags")
+}
+
+model User {
+  id                      String       @id @default(cuid())
+  email                   String       @unique
+  passwordHash            String       @map("password_hash")
+  name                    String?
+  company                 String?
+  role                    UserRole     @default(VIEWER)
+  notificationPreferences Json?        @map("notification_preferences")
+  alerts                  Alert[]
+  scanPeriods             ScanPeriod[]
+  createdAt               DateTime     @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model Alert {
+  id             String         @id @default(cuid())
+  userId         String         @map("user_id")
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  filterCriteria Json           @map("filter_criteria")
+  channel        AlertChannel   @default(EMAIL)
+  frequency      AlertFrequency @default(DAILY)
+  isActive       Boolean        @default(true) @map("is_active")
+  createdAt      DateTime       @default(now()) @map("created_at")
+
+  @@map("alerts")
+}
+
+model ScrapingSource {
+  id              String        @id @default(cuid())
+  organisationId  String        @map("organisation_id")
+  organisation    Organisation  @relation(fields: [organisationId], references: [id])
+  name            String
+  url             String
+  scrapeFrequency String        @map("scrape_frequency")
+  lastScrapedAt   DateTime?     @map("last_scraped_at")
+  scrapeConfig    Json?         @map("scrape_config")
+  isActive        Boolean       @default(true) @map("is_active")
+  runs            ScrapingRun[]
+
+  @@map("scraping_sources")
+}
+
+model ScrapingRun {
+  id           String         @id @default(cuid())
+  sourceId     String         @map("source_id")
+  source       ScrapingSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  startedAt    DateTime       @default(now()) @map("started_at")
+  completedAt  DateTime?      @map("completed_at")
+  status       ScrapingStatus @default(RUNNING)
+  itemsFound   Int            @default(0) @map("items_found")
+  itemsNew     Int            @default(0) @map("items_new")
+  itemsUpdated Int            @default(0) @map("items_updated")
+  errorLog     String?        @map("error_log") @db.Text
+
+  @@map("scraping_runs")
+}
