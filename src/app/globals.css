@@ -20,10 +20,10 @@
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
 
-  --color-nem-bg: #0A1628;
-  --color-nem-card: #13213A;
+  --color-nem-bg: var(--background);
+  --color-nem-card: var(--card);
   --color-nem-accent: #00D4AA;
-  --color-nem-border: #1E3A5F;
+  --color-nem-border: var(--border);
   --color-nem-high: #FF6B6B;
   --color-nem-medium: #F5A623;
   --color-nem-low: #4ECDC4;
@@ -39,6 +39,27 @@
 }
 
 :root {
+  --background: #F8FAFC;
+  --foreground: #0F172A;
+  --card: #FFFFFF;
+  --card-foreground: #0F172A;
+  --primary: #00B894;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E2E8F0;
+  --secondary-foreground: #0F172A;
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;
+  --accent: #E2E8F0;
+  --accent-foreground: #0F172A;
+  --destructive: #EF4444;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #00B894;
+  --sidebar: #F1F5F9;
+  --sidebar-foreground: #64748B;
+}
+
+.dark {
   --background: #0A1628;
   --foreground: #F1F5F9;
   --card: #13213A;

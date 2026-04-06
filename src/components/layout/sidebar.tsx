@@ -55,7 +55,7 @@ export function Sidebar() {
           {!collapsed && (
             <Link href="/dashboard" className="flex items-center gap-2">
               <Zap className="h-6 w-6 text-nem-accent" />
-              <span className="font-heading text-lg font-bold text-white">NEMScan</span>
+              <span className="font-heading text-lg font-bold text-foreground">NEMScan</span>
             </Link>
           )}
           {collapsed && (
@@ -64,7 +64,7 @@ export function Sidebar() {
             </Link>
           )}
           {!collapsed && (
-            <button onClick={() => setCollapsed(true)} className="text-muted-foreground hover:text-white">
+            <button onClick={() => setCollapsed(true)} className="text-muted-foreground hover:text-foreground">
               <PanelLeftClose className="h-4 w-4" />
             </button>
           )}
@@ -88,7 +88,7 @@ export function Sidebar() {
                         "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                         childActive
                           ? "bg-nem-accent/10 text-nem-accent"
-                          : "text-sidebar-foreground hover:bg-white/5 hover:text-white"
+                          : "text-sidebar-foreground hover:bg-accent hover:text-foreground"
                       )}
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
@@ -113,7 +113,7 @@ export function Sidebar() {
                                 "block rounded-lg px-3 py-1.5 text-xs transition-colors",
                                 pathname === child.href
                                   ? "bg-nem-accent/10 text-nem-accent"
-                                  : "text-sidebar-foreground hover:bg-white/5 hover:text-white"
+                                  : "text-sidebar-foreground hover:bg-accent hover:text-foreground"
                               )}
                             >
                               {child.label}
@@ -134,7 +134,7 @@ export function Sidebar() {
                       "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                       isActive
                         ? "bg-nem-accent/10 text-nem-accent"
-                        : "text-sidebar-foreground hover:bg-white/5 hover:text-white"
+                        : "text-sidebar-foreground hover:bg-accent hover:text-foreground"
                     )}
                   >
                     <item.icon className="h-4 w-4 shrink-0" />
@@ -149,7 +149,7 @@ export function Sidebar() {
         {/* Footer */}
         <div className="border-t border-nem-border p-3">
           {collapsed ? (
-            <button onClick={() => setCollapsed(false)} className="mx-auto block text-muted-foreground hover:text-white">
+            <button onClick={() => setCollapsed(false)} className="mx-auto block text-muted-foreground hover:text-foreground">
               <PanelLeft className="h-4 w-4" />
             </button>
           ) : (

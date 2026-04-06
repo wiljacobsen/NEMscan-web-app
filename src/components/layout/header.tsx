@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Search, User, LogOut } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { ThemeToggle } from "./theme-toggle";
 
 export function Header() {
   const router = useRouter();
@@ -33,12 +34,13 @@ export function Header() {
       </form>
 
       <div className="flex items-center gap-4">
+        <ThemeToggle />
         {session?.user ? (
           <div className="flex items-center gap-3">
             <span className="text-sm text-muted-foreground">{session.user.name || session.user.email}</span>
             <button
               onClick={() => signOut()}
-              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-white"
+              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
             >
               <LogOut className="h-4 w-4" />
             </button>
@@ -46,7 +48,7 @@ export function Header() {
         ) : (
           <Link
             href="/auth/signin"
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-white"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
           >
             <User className="h-4 w-4" />
             Sign In
